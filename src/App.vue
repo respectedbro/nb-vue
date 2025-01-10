@@ -1,25 +1,8 @@
-<script setup>
-import MyHello from '@/components/myHello.vue'
-</script>
-
+<script setup></script>
 
 <template>
-<MyHello title="Кроссовки Puma" :price="9500" is-added>
-  <button>Добавить</button>
-</MyHello>
-
-<MyHello>
-  <h4>Hello</h4>
-</MyHello>
-
-
-<MyHello/>
-
-
+  <div class="">
+    <h1>Nik Blog</h1>
+  </div>
 </template>
-
-
-
-<style scoped>
-
-</style>
+<style scoped></style>
