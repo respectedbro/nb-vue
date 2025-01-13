@@ -1,27 +1,26 @@
 <script setup>
-import MainHeader from '@/components/MainHeader.vue'
+import Header from '@/components/Header.vue'
+import CardList from '@/components/CardList.vue'
 </script>
 
 <template>
-  <div class="bg-white w-4/5 m-auto h-screen rounded-xl shadow-xl mt-14">
-<MainHeader/>
-
-<div>
-  <div>
-    <img src="/like-1.svg" alt="like-1">
-    <img src="/sneakers/sneakers-1.jpg" alt="Sneaker">
-    <p>Мужские кроссовки Nike Blazer Mid Suede</p>
-  </div>
-
-  <div class="flex justify-between">
-    <div>
-      <span>Цена:</span>
-      <span>1285 руб.</span>
+  <!--  <Drawer />-->
+  <div class="bg-white w-4/5 m-auto rounded-xl shadow-xl mt-14">
+    <Header />
+    <div class="p-10">
+      <div class="flex justify-between">
+        <h2 class="text-3xl font-bold mb-8">Все кроссовки</h2>
+        <div class="relative">
+          <img class="absolute left-3 top-3" src="/search.svg" alt="search" />
+          <input
+            class="border rounded-md py-2 pl-11 pr-4 outline-none focus:border-gray-400"
+            placeholder="Поиск..."
+            type="text"
+          />
+        </div>
+      </div>
+      <CardList />
     </div>
-
-    <img src="/plus.svg" alt="plus">
-  </div>
-</div>
   </div>
 </template>
 <style scoped></style>
