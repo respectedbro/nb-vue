@@ -1,4 +1,6 @@
 <script setup>
+import { ref } from 'vue'
+
 defineProps({
   imageUrl: String,
   title: String,
@@ -8,6 +10,17 @@ defineProps({
   onClickAdd: Function,
   onClickFavorite: Function,
 })
+
+const isImageLoaded = ref(false)
+
+const onImageLoad = () => {
+  isImageLoaded.value = true // Когда изображение загружается, скрываем прелоадер
+}
+
+const onImageError = () => {
+  isImageLoaded.value = true // Убираем прелоадер даже при ошибке
+  console.error('Ошибка загрузки изображения')
+}
 </script>
 
 <template>
@@ -21,7 +34,21 @@ defineProps({
       @click="onClickFavorite"
     />
 
-    <img :src="imageUrl" alt="Sneaker" />
+    <div
+      v-if="!isImageLoaded"
+      class="absolute inset-0 flex justify-center items-center bg-gray-100 rounded-3xl"
+    >
+      <img src="/loader/bouncing-squares.svg" alt="Loading..." class="h-6 w-6" />
+    </div>
+
+    <img
+      v-show="isImageLoaded"
+      :src="imageUrl"
+      alt="Sneaker"
+      class="rounded-lg w-full h-auto"
+      @load="onImageLoad"
+      @error="onImageError"
+    />
 
     <p class="mt-2">{{ title }}</p>
 
@@ -35,5 +62,3 @@ defineProps({
     </div>
   </div>
 </template>
-
-
