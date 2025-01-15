@@ -6,6 +6,7 @@ import CardList from '@/components/CardList.vue'
 import axios from 'axios'
 
 const items = ref([])
+const isLoading = ref(false)
 
 const filters = reactive({
   sortBy: 'title',
@@ -21,6 +22,7 @@ const onChangeSearchInput = (event) => {
 }
 
 const fetchItems = async () => {
+  isLoading.value = true
   try {
     const params = {
       sortBy: filters.sortBy,
@@ -36,6 +38,8 @@ const fetchItems = async () => {
     items.value = data
   } catch (err) {
     console.log(err)
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -69,7 +73,11 @@ watch(filters, fetchItems)
           </div>
         </div>
       </div>
-      <div class="mt-10">
+      <div v-if="isLoading" class="flex justify-center items-center mt-10">
+        <img src="/loader/bouncing-squares.svg" alt="Loading..." class="h-10 w-10" />
+      </div>
+
+      <div v-else class="mt-10">
         <CardList :items="items" />
       </div>
     </div>
