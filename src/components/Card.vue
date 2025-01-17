@@ -2,13 +2,14 @@
 import { ref } from 'vue'
 
 defineProps({
+  id: Number,
   imageUrl: String,
   title: String,
   price: Number,
   isFavorite: Boolean,
   isAdded: Boolean,
-  onClickAdd: Function,
   onClickFavorite: Function,
+  onClickAdd: Function,
 })
 
 const isImageLoaded = ref(false)
@@ -25,7 +26,7 @@ const onImageError = () => {
 
 <template>
   <div
-    class="relative bg-white border border-slate-100 rounded-3xl transition p-8 cursor-pointer hover:-translate-y-2 hover:shadow-xl"
+    class="flex flex-col justify-between relative bg-white border border-slate-100 rounded-3xl transition p-8 cursor-pointer hover:-translate-y-2 hover:shadow-xl"
   >
     <img
       :src="!isFavorite ? '/like-1.svg' : '/like-2.svg'"
@@ -33,7 +34,6 @@ const onImageError = () => {
       class="absolute top-8 left-8"
       @click="onClickFavorite"
     />
-
     <div
       v-if="!isImageLoaded"
       class="absolute inset-0 flex justify-center items-center bg-gray-100 rounded-3xl"
