@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, provide, reactive, ref, watch } from 'vue'
+import { computed, onMounted, provide, reactive, ref, watch } from 'vue'
 
 import Drawer from '@/components/Drawer.vue'
 import Header from '@/components/Header.vue'
@@ -13,6 +13,10 @@ const isLoading = ref(false)
 
 const drawerOpen = ref(false)
 
+const totalPrice = computed(() => cart.value.reduce((acc, item) => acc + item.price, 0))
+
+const vatPrice = computed(() => Math.round((totalPrice.value * 5) / 100))
+
 const closeDrawer = () => {
   drawerOpen.value = false
 }
@@ -22,12 +26,20 @@ const openDrawer = () => {
 }
 
 const addToCart = (item) => {
+  cart.value.push(item)
+  item.isAdded = true
+}
+
+const removeFromCart = (item) => {
+  cart.value.splice(cart.value.indexOf(item), 1)
+  item.isAdded = false
+}
+
+const omClickAddPlus = (item) => {
   if (!item.isAdded) {
-    cart.value.push(item)
-    item.isAdded = true
+    addToCart(item)
   } else {
-    cart.value.slice(cart.value.indexOf(item), 1)
-    item.isAdded = false
+    removeFromCart(item)
   }
 
   console.log(cart)
@@ -127,13 +139,13 @@ onMounted(async () => {
 
 watch(filters, fetchItems)
 
-provide('cartActions', { closeDrawer, openDrawer })
+provide('cart', { cart, closeDrawer, openDrawer, addToCart, removeFromCart })
 </script>
 
 <template>
-  <Drawer v-if="drawerOpen" />
+  <Drawer v-if="drawerOpen" :total-price="totalPrice" :vat-price="vatPrice" />
   <div class="bg-white w-4/5 m-auto rounded-xl shadow-xl mt-14">
-    <Header @open-drawer="openDrawer" />
+    <Header :total-price="totalPrice" @open-drawer="openDrawer" />
 
     <div class="p-10">
       <div class="flex justify-between items-center">
@@ -161,7 +173,7 @@ provide('cartActions', { closeDrawer, openDrawer })
       </div>
 
       <div v-else class="mt-10">
-        <CardList :items="items" @add-to-favorite="addToFavorite" @add-to-cart="addToCart" />
+        <CardList :items="items" @add-to-favorite="addToFavorite" @add-to-cart="omClickAddPlus" />
       </div>
     </div>
   </div>
