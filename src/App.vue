@@ -8,6 +8,7 @@ import axios from 'axios'
 
 const items = ref([])
 const cart = ref([])
+const isCreatingOrder = ref(false)
 
 const isLoading = ref(false)
 
@@ -16,6 +17,10 @@ const drawerOpen = ref(false)
 const totalPrice = computed(() => cart.value.reduce((acc, item) => acc + item.price, 0))
 
 const vatPrice = computed(() => Math.round((totalPrice.value * 5) / 100))
+
+const cartIsEmpty = computed(() => cart.value.length === 0)
+
+const cartButtonDisabled = computed(() => isCreatingOrder.value || cartIsEmpty.value)
 
 const closeDrawer = () => {
   drawerOpen.value = false
@@ -35,6 +40,24 @@ const removeFromCart = (item) => {
   item.isAdded = false
 }
 
+const createOrder = async () => {
+  try {
+    isCreatingOrder.value = true
+    const { data } = await axios.post(`https://44ffac03096c71f1.mokky.dev/orders`, {
+      items: cart.value,
+      totalPrice: totalPrice.value
+    })
+
+    cart.value = []
+
+    return data
+  } catch (err) {
+    console.log(err)
+  } finally {
+    isCreatingOrder.value = false
+  }
+}
+
 const omClickAddPlus = (item) => {
   if (!item.isAdded) {
     addToCart(item)
@@ -47,7 +70,7 @@ const omClickAddPlus = (item) => {
 
 const filters = reactive({
   sortBy: 'title',
-  searchQuery: '',
+  searchQuery: ''
 })
 
 const onChangeSelect = (event) => {
@@ -72,7 +95,7 @@ const fetchFavorites = async () => {
       return {
         ...item,
         isFavorite: true,
-        favoriteId: favorite.id,
+        favoriteId: favorite.id
       }
     })
   } catch (err) {
@@ -86,7 +109,7 @@ const addToFavorite = async (item) => {
   try {
     if (!item.isFavorite) {
       const obj = {
-        parentId: item.id,
+        parentId: item.id
       }
 
       item.isFavorite = true
@@ -109,7 +132,7 @@ const fetchItems = async () => {
   isLoading.value = true
   try {
     const params = {
-      sortBy: filters.sortBy,
+      sortBy: filters.sortBy
     }
 
     if (filters.searchQuery) {
@@ -117,13 +140,13 @@ const fetchItems = async () => {
     }
 
     const { data } = await axios.get(`https://44ffac03096c71f1.mokky.dev/items`, {
-      params,
+      params
     })
     items.value = data.map((obj) => ({
       ...obj,
       isFavorite: false,
       favoriteId: null,
-      isAdded: false,
+      isAdded: false
     }))
   } catch (err) {
     console.log(err)
@@ -133,17 +156,44 @@ const fetchItems = async () => {
 }
 
 onMounted(async () => {
+  const localCart = localStorage.getItem('cart')
+  cart.value = localCart ? JSON.parse(localCart) : []
+
   await fetchItems()
   await fetchFavorites()
+
+  items.value = items.value.map((item) => ({
+    ...item,
+    isAdded: cart.value.some((cartItem) => cartItem.id === item.id)
+  }))
 })
 
 watch(filters, fetchItems)
+
+watch(cart, () => {
+  items.value = items.value.map((item) => ({
+    ...item,
+    isAdded: false
+  }))
+})
+
+watch(cart, () => {
+    localStorage.setItem('cart', JSON.stringify(cart.value))
+  },
+  { deep: true }
+)
 
 provide('cart', { cart, closeDrawer, openDrawer, addToCart, removeFromCart })
 </script>
 
 <template>
-  <Drawer v-if="drawerOpen" :total-price="totalPrice" :vat-price="vatPrice" />
+  <Drawer
+    v-if="drawerOpen"
+    :total-price="totalPrice"
+    :vat-price="vatPrice"
+    @create-order="createOrder"
+    :button-disabled="cartButtonDisabled"
+  />
   <div class="bg-white w-4/5 m-auto rounded-xl shadow-xl mt-14">
     <Header :total-price="totalPrice" @open-drawer="openDrawer" />
 
@@ -151,7 +201,7 @@ provide('cart', { cart, closeDrawer, openDrawer, addToCart, removeFromCart })
       <div class="flex justify-between items-center">
         <h2 class="text-3xl font-bold mb-8">Все кроссовки</h2>
         <div class="flex gap-4">
-          <select @change="onChangeSelect" class="py-2 px-3 border rounded-md outline-none">
+          <select  @change="onChangeSelect" class="py-2 px-3 border rounded-md outline-none">
             <option value="name">По названию</option>
             <option value="price">По цене (дешевле)</option>
             <option value="-price">По цене (дороже)</option>
