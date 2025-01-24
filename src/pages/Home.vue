@@ -35,7 +35,7 @@ const addToFavorite = async (item) => {
   try {
     if (!item.isFavorite) {
       const obj = {
-        parentId: item.id
+        item_id: item.id
       }
 
       item.isFavorite = true
@@ -59,7 +59,7 @@ const fetchFavorites = async () => {
   try {
     const { data: favorites } = await axios.get(`https://44ffac03096c71f1.mokky.dev/favorites`)
     items.value = items.value.map((item) => {
-      const favorite = favorites.find((favorite) => favorite.parentId === item.id)
+      const favorite = favorites.find((favorite) => favorite.item_id === item.id)
 
       if (!favorite) {
         return item
@@ -147,11 +147,8 @@ watch(filters, fetchItems)
       </div>
     </div>
   </div>
-  <div v-if="isLoading" class="flex justify-center items-center mt-10">
-    <img src="/loader/bouncing-squares.svg" alt="Loading..." class="h-10 w-10" />
-  </div>
 
-  <div v-else class="mt-10">
+  <div  class="mt-10">
     <CardList :items="items" @add-to-favorite="addToFavorite" @add-to-cart="omClickAddPlus" />
   </div>
 </template>

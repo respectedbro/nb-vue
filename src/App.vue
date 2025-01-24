@@ -4,7 +4,7 @@ import axios from 'axios'
 
 import Drawer from '@/components/Drawer.vue'
 import Header from '@/components/Header.vue'
-import Home from '@/pages/Home.vue'
+
 
 /*корзина (START)*/
 const cart = ref([])
