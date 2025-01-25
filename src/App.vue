@@ -47,7 +47,7 @@ provide('cart', {
     <Header :total-price="totalPrice" @open-drawer="openDrawer" />
 
     <div class="p-10">
-      <router-view> </router-view>
+      <router-view></router-view>
     </div>
   </div>
 </template>

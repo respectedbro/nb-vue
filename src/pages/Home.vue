@@ -1,16 +1,16 @@
 <script setup>
 import CardList from '@/components/CardList.vue'
 import axios from 'axios'
+import debounce from 'lodash.debounce'
 import { inject, onMounted, reactive, ref, watch } from 'vue'
 
-
-const {cart, addToCart, removeFromCart } = inject('cart')
+const { cart, addToCart, removeFromCart } = inject('cart')
 
 const items = ref([])
 
 const filters = reactive({
   sortBy: 'title',
-  searchQuery: ''
+  searchQuery: '',
 })
 
 const omClickAddPlus = (item) => {
@@ -27,15 +27,15 @@ const onChangeSelect = (event) => {
   filters.sortBy = event.target.value
 }
 
-const onChangeSearchInput = (event) => {
+const onChangeSearchInput = debounce((event) => {
   filters.searchQuery = event.target.value
-}
+}, 200)
 
 const addToFavorite = async (item) => {
   try {
     if (!item.isFavorite) {
       const obj = {
-        item_id: item.id
+        item_id: item.id,
       }
 
       item.isFavorite = true
@@ -55,7 +55,6 @@ const addToFavorite = async (item) => {
 }
 
 const fetchFavorites = async () => {
-
   try {
     const { data: favorites } = await axios.get(`https://44ffac03096c71f1.mokky.dev/favorites`)
     items.value = items.value.map((item) => {
@@ -68,7 +67,7 @@ const fetchFavorites = async () => {
       return {
         ...item,
         isFavorite: true,
-        favoriteId: favorite.id
+        favoriteId: favorite.id,
       }
     })
   } catch (err) {
@@ -76,12 +75,10 @@ const fetchFavorites = async () => {
   }
 }
 
-
-
 const fetchItems = async () => {
   try {
     const params = {
-      sortBy: filters.sortBy
+      sortBy: filters.sortBy,
     }
 
     if (filters.searchQuery) {
@@ -89,13 +86,13 @@ const fetchItems = async () => {
     }
 
     const { data } = await axios.get(`https://44ffac03096c71f1.mokky.dev/items`, {
-      params
+      params,
     })
     items.value = data.map((obj) => ({
       ...obj,
       isFavorite: false,
       favoriteId: null,
-      isAdded: false
+      isAdded: false,
     }))
   } catch (err) {
     console.log(err)
@@ -111,20 +108,19 @@ onMounted(async () => {
 
   items.value = items.value.map((item) => ({
     ...item,
-    isAdded: cart.value.some((cartItem) => cartItem.id === item.id)
+    isAdded: cart.value.some((cartItem) => cartItem.id === item.id),
   }))
 })
 
 watch(cart, () => {
   items.value = items.value.map((item) => ({
     ...item,
-    isAdded: false
+    isAdded: false,
   }))
 })
 
 watch(filters, fetchItems)
 </script>
-
 
 <template>
   <div class="flex justify-between items-center">
@@ -148,11 +144,9 @@ watch(filters, fetchItems)
     </div>
   </div>
 
-  <div  class="mt-10">
+  <div class="mt-10">
     <CardList :items="items" @add-to-favorite="addToFavorite" @add-to-cart="omClickAddPlus" />
   </div>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>
