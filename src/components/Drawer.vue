@@ -3,27 +3,23 @@ import DrawerHead from '@/components/DrawerHead.vue'
 import CartItemList from '@/components/CartItemList.vue'
 import InfoBlock from '@/components/InfoBlock.vue'
 import axios from 'axios'
-import { ref, provide, computed } from 'vue'
-
-const emit = defineEmits(['createOrder'])
+import { computed, inject, ref } from 'vue'
 
 const props = defineProps({
   totalPrice: Number,
   vatPrice: Number,
 })
 
-const {cart, closeDrawer} = provide('cart')
+const { cart, closeDrawer } = inject('cart')
 
-
-
-const isCreatingOrder = ref(false)
+const isCreating = ref(false)
 
 const createOrder = async () => {
   try {
-    isCreatingOrder.value = true
+    isCreating.value = true
     const { data } = await axios.post(`https://44ffac03096c71f1.mokky.dev/orders`, {
       items: cart.value,
-      totalPrice: props.totalPrice.value
+      totalPrice: props.totalPrice.value,
     })
 
     cart.value = []
@@ -32,13 +28,12 @@ const createOrder = async () => {
   } catch (err) {
     console.log(err)
   } finally {
-    isCreatingOrder.value = false
+    isCreating.value = false
   }
 }
 
 const cartIsEmpty = computed(() => cart.value.length === 0)
-const buttonDisabled = computed(() => isCreatingOrder.value || cartIsEmpty.value)
-
+const buttonDisabled = computed(() => isCreating.value || cartIsEmpty.value)
 </script>
 
 <template>
@@ -46,9 +41,13 @@ const buttonDisabled = computed(() => isCreatingOrder.value || cartIsEmpty.value
   <div class="bg-white w-96 h-full fixed right-0 top-0 z-20 p-8">
     <DrawerHead />
 
-    <div v-if="!totalPrice"
-         class="flex h-full items-center"
-    >
+    <InfoBlock
+      title="Заказ оформлен!"
+      description="Ваш заказ #18 скоро будет передан курьерской доставке"
+      image-url="/order-success-icon.png"
+    />
+
+    <div v-if="!totalPrice" class="flex h-full items-center">
       <InfoBlock
         title="Корзина пуста"
         description="Добавьте хотябы одну пару кроссовок, чтобы сделать заказ"
@@ -57,7 +56,7 @@ const buttonDisabled = computed(() => isCreatingOrder.value || cartIsEmpty.value
     </div>
 
     <div v-else>
-      <CartItemList/>
+      <CartItemList />
 
       <div v-if="totalPrice" class="flex flex-col gap-4 mb-6 mt-7">
         <div class="flex gap-2">
